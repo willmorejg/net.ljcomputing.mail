@@ -18,6 +18,7 @@ package net.ljcomputing.mail.rules.impl;
 
 import java.io.IOException;
 
+import javax.mail.Flags.Flag;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -53,6 +54,7 @@ public class PrintMessageContent implements ProcessingRule {
   @Override
   public void processMessageRule(final Message message) throws MessagingException, IOException {
     LOGGER.debug("--message: {}", message.getContent());
+    message.setFlag(Flag.SEEN, true);
   }
 
   /**
@@ -62,6 +64,7 @@ public class PrintMessageContent implements ProcessingRule {
   @Override
   public void processMessageRule(final MimeMessage message) throws MessagingException, IOException {
     LOGGER.debug("--message: {}", message.getContent());
+    message.setFlag(Flag.SEEN, true);
   }
 
 }

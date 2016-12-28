@@ -21,12 +21,14 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
+import javax.mail.search.FlagTerm;
 
 import org.apache.commons.mail.util.MimeMessageUtils;
 import org.slf4j.Logger;
@@ -97,10 +99,10 @@ public class MailProcessor {
         throw new IOException("no inbox found.");
       }
 
-      inbox.open(Folder.READ_ONLY);
+      inbox.open(Folder.READ_WRITE);
 
-      final Message[] messages = inbox.getMessages();
-      LOGGER.info("inbox contains {} messages", messages.length);
+      final Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+      LOGGER.info("inbox contains {} unseen messages", messages.length);
 
       for (int i = 0; i < messages.length; i++) {
         LOGGER.info("... processing message {}", i);
@@ -118,7 +120,7 @@ public class MailProcessor {
       throw new MailProcessorException(exception);
     }
   }
-  
+
   /**
    * Connect to store.
    *
@@ -139,7 +141,7 @@ public class MailProcessor {
       LOGGER.error("FATAL: ", exception);
       throw new MailProcessorException(exception);
     }
-    
+
     return store;
   }
 
