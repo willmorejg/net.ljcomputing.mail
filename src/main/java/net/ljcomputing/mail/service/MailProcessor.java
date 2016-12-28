@@ -43,29 +43,19 @@ import net.ljcomputing.mail.rules.ProcessingRule;
  *
  */
 public class MailProcessor {
-  
-  /**
-   * JavaMail properties.
-   */
-  public enum Props {
-    PROVIDER,
-    HOST,
-    USERNAME,
-    PASSWORD;
-  };
-  
+
   /** The Constant logger. */
   private final static Logger LOGGER = LoggerFactory.getLogger(MailProcessor.class);
-  
+
   /** The JavaMail properties "helper". */
-  private final MailPropeties props;
-  
+  private final MailProperties props;
+
   /** The email session. */
   private final Session session;
-  
+
   /** The email processing rules. */
   private final Set<ProcessingRule> processingRules = new HashSet<ProcessingRule>();
-  
+
   /**
    * Instantiates a new mail processor.
    *
@@ -75,16 +65,20 @@ public class MailProcessor {
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
-  public MailProcessor(final Properties properties) throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
-    this.props = new MailPropeties(properties);
+  public MailProcessor(final Properties properties)
+      throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
+    this.props = new MailProperties(properties);
     this.session = Session.getDefaultInstance(properties, null);
+    
     @SuppressWarnings("unchecked")
-    final Class<? extends ProcessingRule>[] classes = (Class<? extends ProcessingRule>[]) ReflectionUtils.getClasses("net.ljcomputing.mail.rules.impl");
-    for(int c = 0; c < classes.length; c++) {
+    final Class<? extends ProcessingRule>[] classes = (Class<? extends ProcessingRule>[]) ReflectionUtils
+        .getClasses("net.ljcomputing.mail.rules.impl");
+    
+    for (int c = 0; c < classes.length; c++) {
       processingRules.add(classes[c].newInstance());
     }
   }
-  
+
   /**
    * Process inbox.
    *
@@ -92,33 +86,38 @@ public class MailProcessor {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public void processInbox() throws MessagingException, IOException {
-    final Store store = session.getStore(props.valueOf(Props.PROVIDER));
-    store.connect(props.valueOf(Props.HOST), props.valueOf(Props.USERNAME), props.valueOf(Props.PASSWORD));
+    final String provider = props.valueOf(MailProps.PROVIDER);
+    final String host = props.valueOf(MailProps.HOST);
+    final String username = props.valueOf(MailProps.USERNAME);
+    final String password = props.valueOf(MailProps.PASSWORD);
+    final Store store = session.getStore(provider);
+
+    store.connect(host, username, password);
 
     final Folder inbox = store.getFolder("INBOX");
-    
+
     if (inbox == null) {
       throw new IOException("no inbox found.");
     }
-    
+
     inbox.open(Folder.READ_ONLY);
-    
+
     final Message[] messages = inbox.getMessages();
     LOGGER.info("inbox contains {} messages", messages.length);
-    
+
     for (int i = 0; i < messages.length; i++) {
       LOGGER.info("... processing message {}", i);
-      
+
       final Message message = messages[i];
       processMessage(message);
 
       LOGGER.info("... processing message {} ... DONE", i);
     }
-    
+
     inbox.close(false);
     store.close();
   }
-  
+
   /**
    * Process message.
    *
@@ -127,43 +126,19 @@ public class MailProcessor {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public void processMessage(final Message message) throws MessagingException, IOException {
-      for(final ProcessingRule rule : processingRules) {
-        LOGGER.info("... processing rule {}", rule.ruleName());
-        if (message.getContentType().contains(MediaType.TEXT_PLAIN_VALUE)) {
-          rule.processMessageRule(message);
-        } else {
-          final MimeMessage mimeMessage = MimeMessageUtils.createMimeMessage(session, message.getInputStream());
-          rule.processMessageRule(mimeMessage);
-        }
-        LOGGER.info("... processing rule {} ... DONE", rule.ruleName());
+    for (final ProcessingRule rule : processingRules) {
+      LOGGER.info("... processing rule {}", rule.ruleName());
+
+      if (message.getContentType().contains(MediaType.TEXT_PLAIN_VALUE)) {
+        rule.processMessageRule(message);
+      } else {
+        final MimeMessage mimeMessage = MimeMessageUtils.createMimeMessage(session,
+            message.getInputStream());
+        
+        rule.processMessageRule(mimeMessage);
       }
-  }
-  
-  /**
-   * JavaMail propeties "helper".
-   */
-  private static final class MailPropeties {
-    
-    /** The properties. */
-    private final Properties properties;
-    
-    /**
-     * Instantiates a new mail propeties.
-     *
-     * @param properties the properties
-     */
-    public MailPropeties(final Properties properties) {
-      this.properties = properties;
-    }
-    
-    /**
-     * Value of the given JavaMail property key.
-     *
-     * @param key the key
-     * @return the string
-     */
-    public String valueOf(final Props key) {
-      return properties.getProperty(key.toString());
+
+      LOGGER.info("... processing rule {} ... DONE", rule.ruleName());
     }
   }
 }

@@ -19,6 +19,7 @@ package net.ljcomputing.mail;
 import java.util.Properties;
 
 import net.ljcomputing.mail.service.MailProcessor;
+import net.ljcomputing.mail.service.MailProps;
 
 /**
  * Main class that will process emails.
@@ -34,13 +35,13 @@ public class Main {
    * @param args the arguments
    * @throws Exception the exception
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(final String[] args) throws Exception {
 
     final Properties props = new Properties();
-    props.setProperty(MailProcessor.Props.PROVIDER.toString(), "imap");
-    props.setProperty(MailProcessor.Props.HOST.toString(), "localhost");
-    props.setProperty(MailProcessor.Props.USERNAME.toString(), "jim");
-    props.setProperty(MailProcessor.Props.PASSWORD.toString(), "Wiomm$001");
+    props.setProperty(MailProps.PROVIDER.toString(), "imap");
+    props.setProperty(MailProps.HOST.toString(), "localhost");
+    props.setProperty(MailProps.USERNAME.toString(), "jim");
+    props.setProperty(MailProps.PASSWORD.toString(), "Wiomm$001");
     
     final MailProcessor processor = new MailProcessor(props);
     processor.processInbox();
