@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 
 import net.ljcomputing.ReflectionUtils;
+import net.ljcomputing.mail.exception.MailProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
 /**
@@ -60,22 +61,24 @@ public class MailProcessor {
    * Instantiates a new mail processor.
    *
    * @param properties the properties
-   * @throws ClassNotFoundException the class not found exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InstantiationException the instantiation exception
-   * @throws IllegalAccessException the illegal access exception
+   * @throws MailProcessorException the mail processor exception
    */
-  public MailProcessor(final Properties properties)
-      throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
+  public MailProcessor(final Properties properties) throws MailProcessorException {
     this.props = new MailProperties(properties);
     this.session = Session.getDefaultInstance(properties, null);
-    
-    @SuppressWarnings("unchecked")
-    final Class<? extends ProcessingRule>[] classes = (Class<? extends ProcessingRule>[]) ReflectionUtils
-        .getClasses("net.ljcomputing.mail.rules.impl");
-    
-    for (int c = 0; c < classes.length; c++) {
-      processingRules.add(classes[c].newInstance());
+
+    try {
+      @SuppressWarnings("unchecked")
+      final Class<? extends ProcessingRule>[] classes = (Class<? extends ProcessingRule>[]) ReflectionUtils
+          .getClasses("net.ljcomputing.mail.rules.impl");
+
+      for (int c = 0; c < classes.length; c++) {
+        processingRules.add(classes[c].newInstance());
+      }
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+        | IOException exception) {
+      LOGGER.error("FATAL: ", exception);
+      throw new MailProcessorException(exception);
     }
   }
 
@@ -85,57 +88,83 @@ public class MailProcessor {
    * @throws MessagingException the messaging exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public void processInbox() throws MessagingException, IOException {
+  public void processInbox() throws MailProcessorException {
+    try {
+      final Store store = connect();
+      final Folder inbox = store.getFolder("INBOX");
+
+      if (inbox == null) {
+        throw new IOException("no inbox found.");
+      }
+
+      inbox.open(Folder.READ_ONLY);
+
+      final Message[] messages = inbox.getMessages();
+      LOGGER.info("inbox contains {} messages", messages.length);
+
+      for (int i = 0; i < messages.length; i++) {
+        LOGGER.info("... processing message {}", i);
+
+        final Message message = messages[i];
+        processMessage(message);
+
+        LOGGER.info("... processing message {} ... DONE", i);
+      }
+
+      inbox.close(false);
+      store.close();
+    } catch (IOException | MessagingException exception) {
+      LOGGER.error("FATAL: ", exception);
+      throw new MailProcessorException(exception);
+    }
+  }
+  
+  /**
+   * Connect to store.
+   *
+   * @return the store
+   * @throws MailProcessorException the mail processor exception
+   */
+  private Store connect() throws MailProcessorException {
     final String provider = props.valueOf(MailProps.PROVIDER);
     final String host = props.valueOf(MailProps.HOST);
     final String username = props.valueOf(MailProps.USERNAME);
     final String password = props.valueOf(MailProps.PASSWORD);
-    final Store store = session.getStore(provider);
+    Store store;
 
-    store.connect(host, username, password);
-
-    final Folder inbox = store.getFolder("INBOX");
-
-    if (inbox == null) {
-      throw new IOException("no inbox found.");
+    try {
+      store = session.getStore(provider);
+      store.connect(host, username, password);
+    } catch (MessagingException exception) {
+      LOGGER.error("FATAL: ", exception);
+      throw new MailProcessorException(exception);
     }
-
-    inbox.open(Folder.READ_ONLY);
-
-    final Message[] messages = inbox.getMessages();
-    LOGGER.info("inbox contains {} messages", messages.length);
-
-    for (int i = 0; i < messages.length; i++) {
-      LOGGER.info("... processing message {}", i);
-
-      final Message message = messages[i];
-      processMessage(message);
-
-      LOGGER.info("... processing message {} ... DONE", i);
-    }
-
-    inbox.close(false);
-    store.close();
+    
+    return store;
   }
 
   /**
    * Process message.
    *
    * @param message the message
-   * @throws MessagingException the messaging exception
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws MailProcessorException the mail processor exception
    */
-  public void processMessage(final Message message) throws MessagingException, IOException {
+  public void processMessage(final Message message) throws MailProcessorException {
     for (final ProcessingRule rule : processingRules) {
       LOGGER.info("... processing rule {}", rule.ruleName());
 
-      if (message.getContentType().contains(MediaType.TEXT_PLAIN_VALUE)) {
-        rule.processMessageRule(message);
-      } else {
-        final MimeMessage mimeMessage = MimeMessageUtils.createMimeMessage(session,
-            message.getInputStream());
-        
-        rule.processMessageRule(mimeMessage);
+      try {
+        if (message.getContentType().contains(MediaType.TEXT_PLAIN_VALUE)) {
+          rule.processMessageRule(message);
+        } else {
+          final MimeMessage mimeMessage = MimeMessageUtils.createMimeMessage(session,
+              message.getInputStream());
+
+          rule.processMessageRule(mimeMessage);
+        }
+      } catch (MessagingException | IOException exception) {
+        LOGGER.error("FATAL: ", exception);
+        throw new MailProcessorException(exception);
       }
 
       LOGGER.info("... processing rule {} ... DONE", rule.ruleName());
