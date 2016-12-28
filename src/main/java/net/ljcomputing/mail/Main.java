@@ -18,6 +18,7 @@ package net.ljcomputing.mail;
 
 import java.util.Properties;
 
+import net.ljcomputing.mail.exception.MailProcessorException;
 import net.ljcomputing.mail.service.MailProcessor;
 import net.ljcomputing.mail.service.MailProps;
 
@@ -35,7 +36,7 @@ public class Main {
    * @param args the arguments
    * @throws Exception the exception
    */
-  public static void main(final String[] args) throws Exception {
+  public static void main(final String[] args) {
 
     final Properties props = new Properties();
     props.setProperty(MailProps.PROVIDER.toString(), "imap");
@@ -43,8 +44,12 @@ public class Main {
     props.setProperty(MailProps.USERNAME.toString(), "jim");
     props.setProperty(MailProps.PASSWORD.toString(), "Wiomm$001");
     
-    final MailProcessor processor = new MailProcessor(props);
-    processor.processInbox();
+    try {
+      final MailProcessor processor = new MailProcessor(props);
+      processor.processInbox();
+    } catch (MailProcessorException exception) {
+      exception.printStackTrace();
+    }
   }
 
 }
