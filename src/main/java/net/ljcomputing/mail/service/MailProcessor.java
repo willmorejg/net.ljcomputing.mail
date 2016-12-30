@@ -17,7 +17,9 @@
 package net.ljcomputing.mail.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 
@@ -35,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 
-import net.ljcomputing.ReflectionUtils;
 import net.ljcomputing.mail.exception.MailProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
@@ -70,18 +71,52 @@ public class MailProcessor {
     this.session = Session.getDefaultInstance(properties, null);
 
     try {
-      @SuppressWarnings("unchecked")
-      final Class<? extends ProcessingRule>[] classes = (Class<? extends ProcessingRule>[]) ReflectionUtils
-          .getClasses("net.ljcomputing.mail.rules.impl");
+      final Set<Class<? extends ProcessingRule>> classes = loadProcessingRules();
 
-      for (int c = 0; c < classes.length; c++) {
-        processingRules.add(classes[c].newInstance());
+      for (final Class<? extends ProcessingRule> ruleCls : classes) {
+        processingRules.add(ruleCls.newInstance());
       }
-    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-        | IOException exception) {
+    } catch (InstantiationException | IllegalAccessException exception) {
       LOGGER.error("FATAL: ", exception);
       throw new MailProcessorException(exception);
     }
+  }
+
+  /**
+   * Load processing rules.
+   *
+   * @return the properties
+   * @throws MailProcessorException the mail processor exception
+   */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private Set<Class<? extends ProcessingRule>> loadProcessingRules() throws MailProcessorException {
+    final Set<Class<? extends ProcessingRule>> rules = new LinkedHashSet<Class<? extends ProcessingRule>>();
+    final Properties properties = new Properties();
+    final Thread thread = Thread.currentThread();
+    final ClassLoader loader = thread.getContextClassLoader();
+    final InputStream is = loader.getResourceAsStream("application.properties");
+
+    try {
+      properties.load(is);
+
+      final Set keys = properties.keySet();
+
+      for (final Object obj : keys) {
+        final String key = obj.toString();
+
+        if (key != null && key.startsWith("email.rules.")) {
+          final String className = properties.getProperty(key);
+          final Class<? extends ProcessingRule> rule = (Class<? extends ProcessingRule>) Class
+              .forName(className);
+          rules.add(rule);
+        }
+      }
+    } catch (IOException | ClassNotFoundException exception) {
+      LOGGER.error("FATAL: ", exception);
+      throw new MailProcessorException(exception);
+    }
+
+    return rules;
   }
 
   /**
@@ -96,7 +131,7 @@ public class MailProcessor {
       final Folder inbox = store.getFolder("INBOX");
 
       if (inbox == null) {
-        throw new IOException("no inbox found.");
+        throw new MailProcessorException("no inbox found.");
       }
 
       inbox.open(Folder.READ_WRITE);
@@ -115,7 +150,7 @@ public class MailProcessor {
 
       inbox.close(false);
       store.close();
-    } catch (IOException | MessagingException exception) {
+    } catch (MessagingException exception) {
       LOGGER.error("FATAL: ", exception);
       throw new MailProcessorException(exception);
     }

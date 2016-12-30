@@ -18,6 +18,7 @@ package net.ljcomputing.mail.rules.impl;
 
 import java.io.IOException;
 
+import javax.mail.Flags.Flag;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -28,22 +29,20 @@ import org.slf4j.LoggerFactory;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
 /**
- * Email processing rule to print the content of an email message.
- * 
  * @author James G. Willmore
  *
  */
-public class PrintMessageContent implements ProcessingRule {
+public class MarkMessageAsSeen implements ProcessingRule {
   
   /** The Constant logger. */
-  private final static Logger LOGGER = LoggerFactory.getLogger(PrintMessageContent.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(MarkMessageAsSeen.class);
   
   /**
    * @see net.ljcomputing.mail.rules.ProcessingRule#ruleName()
    */
   @Override
   public String ruleName() {
-    return "Print Message";
+    return "Mark Message As Seen";
   }
 
   /**
@@ -52,7 +51,8 @@ public class PrintMessageContent implements ProcessingRule {
    */
   @Override
   public void processMessageRule(final Message message) throws MessagingException, IOException {
-    LOGGER.debug("--message: {}", message.getContent());
+    message.setFlag(Flag.SEEN, true);
+    LOGGER.debug("--message marked as seen");
   }
 
   /**
@@ -61,6 +61,7 @@ public class PrintMessageContent implements ProcessingRule {
    */
   @Override
   public void processMessageRule(final MimeMessage message) throws MessagingException, IOException {
-    LOGGER.debug("--message: {}", message.getContent());
+    message.setFlag(Flag.SEEN, true);
+    LOGGER.debug("--message marked as seen");
   }
 }
