@@ -134,7 +134,7 @@ public class MailProcessor {
         throw new MailProcessorException("no inbox found.");
       }
 
-      inbox.open(Folder.READ_WRITE);
+      inbox.open(Folder.READ_ONLY);//_WRITE);
 
       final Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
       LOGGER.info("inbox contains {} unseen messages", messages.length);
