@@ -17,8 +17,10 @@
 package net.ljcomputing.mail.rules.impl;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.mail.Address;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -49,8 +51,11 @@ public class PrintMessageMetadata implements ProcessingRule {
    * @see net.ljcomputing.mail.rules.ProcessingRule
    *    #processMessageRule(javax.mail.Message)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void processMessageRule(final Message message) throws MessagingException, IOException {
+    LOGGER.debug("--Headers:");
+    printHeaders(message.getAllHeaders());
     LOGGER.debug("--From:");
     printAddresses(message.getFrom());
     LOGGER.debug("--ALL Recipients:");
@@ -62,8 +67,11 @@ public class PrintMessageMetadata implements ProcessingRule {
    * @see net.ljcomputing.mail.rules.ProcessingRule#
    *    processMessageRule(javax.mail.internet.MimeMessage)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void processMessageRule(final MimeMessage message) throws MessagingException, IOException {
+    LOGGER.debug("--Headers:");
+    printHeaders(message.getAllHeaders());
     LOGGER.debug("--From:");
     printAddresses(message.getFrom());
     LOGGER.debug("--ALL Recipients:");
@@ -76,10 +84,24 @@ public class PrintMessageMetadata implements ProcessingRule {
    *
    * @param addresses the addresses
    */
-  private static void printAddresses(final Address[] addresses) {
+  private void printAddresses(final Address[] addresses) {
     if (addresses != null) {
       for (int a = 0; a < addresses.length; a++) {
         LOGGER.debug("    {}", addresses[a]);
+      }
+    }
+  }
+  
+  /**
+   * Prints the headers.
+   *
+   * @param headers the headers
+   */
+  private void printHeaders(final Enumeration<Header> headers) {
+    if (headers != null) {
+      while (headers.hasMoreElements()) {
+        final Header header = headers.nextElement();
+        LOGGER.debug("    {}", header);
       }
     }
   }
