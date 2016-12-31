@@ -15,9 +15,9 @@
  */
 
 /**
- * Package containing email rule processing classes.
+ * Package containing Freemarker template classes.
  * 
  * @author James G. Willmore
  *
  */
-package net.ljcomputing.mail.rules;
+package net.ljcomputing.mail.template;

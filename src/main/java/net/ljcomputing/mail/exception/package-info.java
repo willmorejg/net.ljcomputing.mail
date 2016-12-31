@@ -15,6 +15,8 @@
  */
 
 /**
+ * Package containing exception classes.
+ * 
  * @author James G. Willmore
  *
  */

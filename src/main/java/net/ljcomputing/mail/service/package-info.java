@@ -15,9 +15,9 @@
  */
 
 /**
- * Package containing email rule processing classes.
+ * Package containing email processing service classes.
  * 
  * @author James G. Willmore
  *
  */
-package net.ljcomputing.mail.rules;
+package net.ljcomputing.mail.service;

@@ -15,6 +15,8 @@
  */
 
 /**
+ * Package containing email rule processing implementations.
+ * 
  * @author James G. Willmore
  *
  */

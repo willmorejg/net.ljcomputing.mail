@@ -17,6 +17,12 @@
 		<target.version>1.8</target.version>
 
 		<github.username>willmorejg</github.username>
+		
+		<javax.mail.version>1.5.6</javax.mail.version>
+		<logback-classic.version>1.1.7</logback-classic.version>
+		<log4j-over-slf4j.version>1.7.21</log4j-over-slf4j.version>
+		<jsoup.version>1.10.1</jsoup.version>
+		<freemarker.version>2.3.25-incubating</freemarker.version>
 	</properties>
 
 
@@ -59,33 +65,33 @@
 
 	</distributionManagement>
 
-    <dependencies>
-        <dependency>
-        	<groupId>com.sun.mail</groupId>
-        	<artifactId>javax.mail</artifactId>
-        	<version>1.5.6</version>
-        </dependency>
-        <dependency>
-        	<groupId>ch.qos.logback</groupId>
-        	<artifactId>logback-classic</artifactId>
-        	<version>1.1.7</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.slf4j</groupId>
-        	<artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.21</version>
-        </dependency>
-        <dependency>
-        	<groupId>com.google.guava</groupId>
-        	<artifactId>guava</artifactId>
-        	<version>20.0</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.jsoup</groupId>
-        	<artifactId>jsoup</artifactId>
-        	<version>1.10.1</version>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>${javax.mail.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback-classic.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>${log4j-over-slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>${jsoup.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>${freemarker.version}</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 
