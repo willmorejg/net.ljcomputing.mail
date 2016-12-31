@@ -19,7 +19,7 @@ package net.ljcomputing.mail;
 import java.util.Properties;
 
 import net.ljcomputing.mail.exception.MailProcessorException;
-import net.ljcomputing.mail.service.MailProcessor;
+import net.ljcomputing.mail.service.EmailRulesProcessor;
 import net.ljcomputing.mail.service.MailProps;
 
 /**
@@ -45,7 +45,7 @@ public class Main {
     props.setProperty(MailProps.PASSWORD.toString(), "Wiomm$001");
     
     try {
-      final MailProcessor processor = new MailProcessor(props);
+      final EmailRulesProcessor processor = new EmailRulesProcessor(props);
       processor.processInbox();
     } catch (MailProcessorException exception) {
       exception.printStackTrace();

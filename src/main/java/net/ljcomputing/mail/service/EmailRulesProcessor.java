@@ -38,15 +38,15 @@ import net.ljcomputing.mail.exception.MailProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
 /**
- * An email processor.
+ * An email rules processor.
  * 
  * @author James G. Willmore
  *
  */
-public class MailProcessor {
+public class EmailRulesProcessor {
 
   /** The Constant logger. */
-  private final static Logger LOGGER = LoggerFactory.getLogger(MailProcessor.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(EmailRulesProcessor.class);
 
   /** The JavaMail properties "helper". */
   private final MailProperties props;
@@ -63,7 +63,7 @@ public class MailProcessor {
    * @param properties the properties
    * @throws MailProcessorException the mail processor exception
    */
-  public MailProcessor(final Properties properties) throws MailProcessorException {
+  public EmailRulesProcessor(final Properties properties) throws MailProcessorException {
     this.props = new MailProperties(properties);
     this.session = Session.getDefaultInstance(properties, null);
     loadProcessingRules();
