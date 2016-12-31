@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 /**
  * Interface shared by all email processing rules.
@@ -45,13 +44,4 @@ public interface ProcessingRule {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void processMessageRule(Message message) throws MessagingException, IOException;
-  
-  /**
-   * Process message rule.
-   *
-   * @param message the message
-   * @throws MessagingException the messaging exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  void processMessageRule(MimeMessage message) throws MessagingException, IOException;
 }

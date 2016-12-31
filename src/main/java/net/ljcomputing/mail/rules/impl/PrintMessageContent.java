@@ -18,12 +18,16 @@ package net.ljcomputing.mail.rules.impl;
 
 import java.io.IOException;
 
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeMultipart;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.net.MediaType;
 
 import net.ljcomputing.mail.rules.ProcessingRule;
 
@@ -52,15 +56,39 @@ public class PrintMessageContent implements ProcessingRule {
    */
   @Override
   public void processMessageRule(final Message message) throws MessagingException, IOException {
-    LOGGER.debug("--message: {}", message.getContent());
-  }
+    final Object content = message.getContent();
+    final MediaType mediaType = MediaType.parse(message.getContentType());
+    
+    if (mediaType.is(MediaType.ANY_TEXT_TYPE)) {
+      print(content);
+    } else {
+      final int parts = ((Multipart)content).getCount();
+      LOGGER.debug("--multipart count: {}", parts);
+      
+      for (int p = 0; p < parts; p++) {
+        final BodyPart bodyPart = ((Multipart)content).getBodyPart(p);
+        final Object bodyContent = bodyPart.getContent();
+        final MediaType bodyPartMediaType = MediaType.parse(bodyPart.getContentType());
+        LOGGER.debug("==>> bodyPart, content type: {}", bodyPart.getContentType());
 
+        if (bodyPartMediaType.is(MediaType.ANY_TEXT_TYPE)) {
+          print(bodyContent);
+        }
+        if (bodyPart.getContentType().startsWith("multipart/")) {
+          LOGGER.debug("--==>>multipart count: {}", ((MimeMultipart)bodyContent).getCount());
+          final MimeMultipart mimeMultipart = (MimeMultipart)bodyContent;
+          print(mimeMultipart.getBodyPart(1).getContent());
+        }
+      }
+    }
+  }
+  
   /**
-   * @see net.ljcomputing.mail.rules.ProcessingRule#
-   *    processMessageRule(javax.mail.internet.MimeMessage)
+   * Prints the message content.
+   *
+   * @param content the content
    */
-  @Override
-  public void processMessageRule(final MimeMessage message) throws MessagingException, IOException {
-    LOGGER.debug("--message: {}", message.getContent());
+  private static void print(final Object content) {
+    LOGGER.debug("--message content: {}", content);
   }
 }

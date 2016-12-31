@@ -23,7 +23,6 @@ import javax.mail.Address;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,23 +54,8 @@ public class PrintMessageMetadata implements ProcessingRule {
   @Override
   public void processMessageRule(final Message message) throws MessagingException, IOException {
     LOGGER.debug("--Headers:");
-    printHeaders(message.getAllHeaders());
-    LOGGER.debug("--From:");
-    printAddresses(message.getFrom());
-    LOGGER.debug("--ALL Recipients:");
-    printAddresses(message.getAllRecipients());
-    LOGGER.debug("--Subject: {}", message.getSubject());
-  }
-
-  /**
-   * @see net.ljcomputing.mail.rules.ProcessingRule#
-   *    processMessageRule(javax.mail.internet.MimeMessage)
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public void processMessageRule(final MimeMessage message) throws MessagingException, IOException {
-    LOGGER.debug("--Headers:");
-    printHeaders(message.getAllHeaders());
+    final Enumeration<Header> headers = message.getAllHeaders();
+    printHeaders(headers);
     LOGGER.debug("--From:");
     printAddresses(message.getFrom());
     LOGGER.debug("--ALL Recipients:");
@@ -101,7 +85,7 @@ public class PrintMessageMetadata implements ProcessingRule {
     if (headers != null) {
       while (headers.hasMoreElements()) {
         final Header header = headers.nextElement();
-        LOGGER.debug("    {}", header);
+        LOGGER.debug("    {}: {}", header.getName(), header.getValue());
       }
     }
   }

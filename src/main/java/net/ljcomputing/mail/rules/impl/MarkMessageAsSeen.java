@@ -21,7 +21,6 @@ import java.io.IOException;
 import javax.mail.Flags.Flag;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,16 +50,6 @@ public class MarkMessageAsSeen implements ProcessingRule {
    */
   @Override
   public void processMessageRule(final Message message) throws MessagingException, IOException {
-    message.setFlag(Flag.SEEN, true);
-    LOGGER.debug("--message marked as seen");
-  }
-
-  /**
-   * @see net.ljcomputing.mail.rules.ProcessingRule#
-   *    processMessageRule(javax.mail.internet.MimeMessage)
-   */
-  @Override
-  public void processMessageRule(final MimeMessage message) throws MessagingException, IOException {
     message.setFlag(Flag.SEEN, true);
     LOGGER.debug("--message marked as seen");
   }
