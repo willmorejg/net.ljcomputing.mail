@@ -16,8 +16,6 @@
 
 package net.ljcomputing.mail.rules.impl;
 
-import java.io.IOException;
-
 import javax.mail.Flags.Flag;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -25,6 +23,7 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.ljcomputing.mail.exception.EmailRuleProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
 /**
@@ -32,10 +31,10 @@ import net.ljcomputing.mail.rules.ProcessingRule;
  *
  */
 public class MarkMessageAsSeen implements ProcessingRule {
-  
+
   /** The Constant logger. */
   private final static Logger LOGGER = LoggerFactory.getLogger(MarkMessageAsSeen.class);
-  
+
   /**
    * @see net.ljcomputing.mail.rules.ProcessingRule#ruleName()
    */
@@ -45,12 +44,16 @@ public class MarkMessageAsSeen implements ProcessingRule {
   }
 
   /**
-   * @see net.ljcomputing.mail.rules.ProcessingRule
-   *    #processMessageRule(javax.mail.Message)
+   * @see net.ljcomputing.mail.rules.ProcessingRule#processMessageRule(javax.mail.Message)
    */
   @Override
-  public void processMessageRule(final Message message) throws MessagingException, IOException {
-    message.setFlag(Flag.SEEN, true);
-    LOGGER.debug("--message marked as seen");
+  public void processMessageRule(final Message message) throws EmailRuleProcessorException {
+    try {
+      message.setFlag(Flag.SEEN, true);
+      LOGGER.debug("--message marked as seen");
+    } catch (MessagingException exception) {
+      LOGGER.error("FATAL: ", exception);
+      throw new EmailRuleProcessorException(exception);
+    }
   }
 }

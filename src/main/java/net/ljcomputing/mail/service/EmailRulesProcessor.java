@@ -34,7 +34,7 @@ import javax.mail.search.FlagTerm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.ljcomputing.mail.exception.MailProcessorException;
+import net.ljcomputing.mail.exception.EmailRuleProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
 /**
@@ -61,9 +61,9 @@ public class EmailRulesProcessor {
    * Instantiates a new mail processor.
    *
    * @param properties the properties
-   * @throws MailProcessorException the mail processor exception
+   * @throws EmailRuleProcessorException the mail processor exception
    */
-  public EmailRulesProcessor(final Properties properties) throws MailProcessorException {
+  public EmailRulesProcessor(final Properties properties) throws EmailRuleProcessorException {
     this.props = new MailProperties(properties);
     this.session = Session.getDefaultInstance(properties, null);
     loadProcessingRules();
@@ -75,13 +75,13 @@ public class EmailRulesProcessor {
    * @throws MessagingException the messaging exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public void processInbox() throws MailProcessorException {
+  public void processInbox() throws EmailRuleProcessorException {
     try {
       final Store store = connect();
       final Folder inbox = store.getFolder("INBOX");
 
       if (inbox == null) {
-        throw new MailProcessorException("no inbox found.");
+        throw new EmailRuleProcessorException("no inbox found.");
       }
 
       inbox.open(Folder.READ_ONLY);//_WRITE);
@@ -102,7 +102,7 @@ public class EmailRulesProcessor {
       store.close();
     } catch (MessagingException exception) {
       LOGGER.error("FATAL: ", exception);
-      throw new MailProcessorException(exception);
+      throw new EmailRuleProcessorException(exception);
     }
   }
 
@@ -110,19 +110,12 @@ public class EmailRulesProcessor {
    * Process message.
    *
    * @param message the message
-   * @throws MailProcessorException the mail processor exception
+   * @throws EmailRuleProcessorException the mail processor exception
    */
-  public void processMessage(final Message message) throws MailProcessorException {
+  public void processMessage(final Message message) throws EmailRuleProcessorException {
     for (final ProcessingRule rule : processingRules) {
       LOGGER.info("............ ............  processing rule {}", rule.ruleName());
-
-      try {
-        rule.processMessageRule(message);
-      } catch (MessagingException | IOException exception) {
-        LOGGER.error("FATAL: ", exception);
-        throw new MailProcessorException(exception);
-      }
-
+      rule.processMessageRule(message);
       LOGGER.info("............ ... DONE ... processing rule {}", rule.ruleName());
     }
   }
@@ -131,9 +124,9 @@ public class EmailRulesProcessor {
    * Load properties.
    *
    * @return the properties
-   * @throws MailProcessorException the mail processor exception
+   * @throws EmailRuleProcessorException the mail processor exception
    */
-  private Properties loadProperties() throws MailProcessorException {
+  private Properties loadProperties() throws EmailRuleProcessorException {
     final Thread thread = Thread.currentThread();
     final ClassLoader loader = thread.getContextClassLoader();
     final InputStream is = loader.getResourceAsStream("application.properties");
@@ -142,7 +135,7 @@ public class EmailRulesProcessor {
     try {
       properties.load(is);
     } catch (IOException exception) {
-      throw new MailProcessorException(exception);
+      throw new EmailRuleProcessorException(exception);
     }
 
     return properties;
@@ -172,10 +165,10 @@ public class EmailRulesProcessor {
    * Load processing rules.
    *
    * @return the properties
-   * @throws MailProcessorException the mail processor exception
+   * @throws EmailRuleProcessorException the mail processor exception
    */
   @SuppressWarnings({ "unchecked" })
-  private void loadProcessingRules() throws MailProcessorException {
+  private void loadProcessingRules() throws EmailRuleProcessorException {
     try {
       final Properties properties = loadProperties();
       final Set<String> propKeys = loadRuleKeys(properties);
@@ -188,7 +181,7 @@ public class EmailRulesProcessor {
       }
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException exception) {
       LOGGER.error("FATAL: ", exception);
-      throw new MailProcessorException(exception);
+      throw new EmailRuleProcessorException(exception);
     }
   }
 
@@ -196,9 +189,9 @@ public class EmailRulesProcessor {
    * Connect to store.
    *
    * @return the store
-   * @throws MailProcessorException the mail processor exception
+   * @throws EmailRuleProcessorException the mail processor exception
    */
-  private Store connect() throws MailProcessorException {
+  private Store connect() throws EmailRuleProcessorException {
     final String provider = props.valueOf(MailProps.PROVIDER);
     final String host = props.valueOf(MailProps.HOST);
     final String username = props.valueOf(MailProps.USERNAME);
@@ -210,7 +203,7 @@ public class EmailRulesProcessor {
       store.connect(host, username, password);
     } catch (MessagingException exception) {
       LOGGER.error("FATAL: ", exception);
-      throw new MailProcessorException(exception);
+      throw new EmailRuleProcessorException(exception);
     }
 
     return store;

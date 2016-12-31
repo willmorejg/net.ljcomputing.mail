@@ -17,12 +17,12 @@
 package net.ljcomputing.mail.exception;
 
 /**
- * Mail processor exception.
+ * Email rule processor exception.
  * 
  * @author James G. Willmore
  *
  */
-public class MailProcessorException extends Exception {
+public class EmailRuleProcessorException extends Exception {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -4526014667277293315L;
@@ -30,7 +30,7 @@ public class MailProcessorException extends Exception {
   /**
    * Instantiates a new mail processor exception.
    */
-  public MailProcessorException() {
+  public EmailRuleProcessorException() {
     super();
   }
 
@@ -39,7 +39,7 @@ public class MailProcessorException extends Exception {
    *
    * @param message the message
    */
-  public MailProcessorException(final String message) {
+  public EmailRuleProcessorException(final String message) {
     super(message);
   }
 
@@ -48,7 +48,7 @@ public class MailProcessorException extends Exception {
    *
    * @param cause the cause
    */
-  public MailProcessorException(final Throwable cause) {
+  public EmailRuleProcessorException(final Throwable cause) {
     super(cause);
   }
 
@@ -58,7 +58,7 @@ public class MailProcessorException extends Exception {
    * @param message the message
    * @param cause the cause
    */
-  public MailProcessorException(final String message, final Throwable cause) {
+  public EmailRuleProcessorException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
@@ -70,7 +70,7 @@ public class MailProcessorException extends Exception {
    * @param suppression the suppression
    * @param writable the writable
    */
-  public MailProcessorException(final String message, final Throwable cause,
+  public EmailRuleProcessorException(final String message, final Throwable cause,
       final boolean suppression, final boolean writable) {
     super(message, cause, suppression, writable);
   }

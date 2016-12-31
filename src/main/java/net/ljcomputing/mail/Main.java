@@ -18,7 +18,7 @@ package net.ljcomputing.mail;
 
 import java.util.Properties;
 
-import net.ljcomputing.mail.exception.MailProcessorException;
+import net.ljcomputing.mail.exception.EmailRuleProcessorException;
 import net.ljcomputing.mail.service.EmailRulesProcessor;
 import net.ljcomputing.mail.service.MailProps;
 
@@ -37,7 +37,6 @@ public class Main {
    * @throws Exception the exception
    */
   public static void main(final String[] args) {
-
     final Properties props = new Properties();
     props.setProperty(MailProps.PROVIDER.toString(), "imap");
     props.setProperty(MailProps.HOST.toString(), "localhost");
@@ -47,7 +46,7 @@ public class Main {
     try {
       final EmailRulesProcessor processor = new EmailRulesProcessor(props);
       processor.processInbox();
-    } catch (MailProcessorException exception) {
+    } catch (EmailRuleProcessorException exception) {
       exception.printStackTrace();
     }
   }

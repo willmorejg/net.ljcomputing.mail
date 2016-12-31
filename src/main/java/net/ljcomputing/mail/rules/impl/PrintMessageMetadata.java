@@ -16,7 +16,6 @@
 
 package net.ljcomputing.mail.rules.impl;
 
-import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.mail.Address;
@@ -27,6 +26,7 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.ljcomputing.mail.exception.EmailRuleProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
 /**
@@ -34,10 +34,10 @@ import net.ljcomputing.mail.rules.ProcessingRule;
  *
  */
 public class PrintMessageMetadata implements ProcessingRule {
-  
+
   /** The Constant logger. */
   private final static Logger LOGGER = LoggerFactory.getLogger(PrintMessageMetadata.class);
-  
+
   /**
    * @see net.ljcomputing.mail.rules.ProcessingRule#ruleName()
    */
@@ -47,22 +47,26 @@ public class PrintMessageMetadata implements ProcessingRule {
   }
 
   /**
-   * @see net.ljcomputing.mail.rules.ProcessingRule
-   *    #processMessageRule(javax.mail.Message)
+   * @see net.ljcomputing.mail.rules.ProcessingRule#processMessageRule(javax.mail.Message)
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void processMessageRule(final Message message) throws MessagingException, IOException {
-    LOGGER.debug("--Headers:");
-    final Enumeration<Header> headers = message.getAllHeaders();
-    printHeaders(headers);
-    LOGGER.debug("--From:");
-    printAddresses(message.getFrom());
-    LOGGER.debug("--ALL Recipients:");
-    printAddresses(message.getAllRecipients());
-    LOGGER.debug("--Subject: {}", message.getSubject());
+  public void processMessageRule(final Message message) throws EmailRuleProcessorException {
+    try {
+      LOGGER.debug("--Headers:");
+      Enumeration<Header> headers = message.getAllHeaders();
+      printHeaders(headers);
+      LOGGER.debug("--From:");
+      printAddresses(message.getFrom());
+      LOGGER.debug("--ALL Recipients:");
+      printAddresses(message.getAllRecipients());
+      LOGGER.debug("--Subject: {}", message.getSubject());
+    } catch (MessagingException exception) {
+      LOGGER.error("FATAL: ", exception);
+      throw new EmailRuleProcessorException(exception);
+    }
   }
-  
+
   /**
    * Prints the addresses.
    *
@@ -75,7 +79,7 @@ public class PrintMessageMetadata implements ProcessingRule {
       }
     }
   }
-  
+
   /**
    * Prints the headers.
    *

@@ -16,10 +16,9 @@
 
 package net.ljcomputing.mail.rules;
 
-import java.io.IOException;
-
 import javax.mail.Message;
-import javax.mail.MessagingException;
+
+import net.ljcomputing.mail.exception.EmailRuleProcessorException;
 
 /**
  * Interface shared by all email processing rules.
@@ -40,8 +39,7 @@ public interface ProcessingRule {
    * Process message rule.
    *
    * @param message the message
-   * @throws MessagingException the messaging exception
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EmailRuleProcessorException the email rule processor exception
    */
-  void processMessageRule(Message message) throws MessagingException, IOException;
+  void processMessageRule(Message message) throws EmailRuleProcessorException;
 }
