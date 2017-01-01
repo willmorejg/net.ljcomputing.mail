@@ -84,7 +84,7 @@ public class EmailRulesProcessor {
         throw new EmailRuleProcessorException("no inbox found.");
       }
 
-      inbox.open(Folder.READ_ONLY);//_WRITE);
+      inbox.open(Folder.READ_WRITE);
 
       final Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
       LOGGER.info("inbox contains {} unseen messages", messages.length);

@@ -30,6 +30,8 @@ import net.ljcomputing.mail.exception.EmailRuleProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
 
 /**
+ * Email processing rule to print the email message's headers.
+ * 
  * @author James G. Willmore
  *
  */

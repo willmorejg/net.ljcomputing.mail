@@ -16,44 +16,66 @@
 
 package net.ljcomputing.mail.rules.impl;
 
-import javax.mail.Flags.Flag;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import net.ljcomputing.mail.domain.Email;
 import net.ljcomputing.mail.exception.EmailRuleProcessorException;
 import net.ljcomputing.mail.rules.ProcessingRule;
+import net.ljcomputing.mail.template.FreemarkerConfiguration;
 
 /**
- * Email processing rule to mark the email message as seen.
+ * Email processing rule to print the email message using a Freemarker template.
  * 
  * @author James G. Willmore
  *
  */
-public class MarkMessageAsSeen implements ProcessingRule {
+public class PrintMessageUsingTemplate implements ProcessingRule {
 
   /** The Constant logger. */
-  private final static Logger LOGGER = LoggerFactory.getLogger(MarkMessageAsSeen.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(PrintMessageUsingTemplate.class);
+  
+  private static final Configuration FREEMARKER_CFG = FreemarkerConfiguration.INSTANCE.configuration();
 
   /**
    * @see net.ljcomputing.mail.rules.ProcessingRule#ruleName()
    */
   @Override
   public String ruleName() {
-    return "Mark Message As Seen";
+    return "Print Message Using Template";
   }
 
   /**
    * @see net.ljcomputing.mail.rules.ProcessingRule#processMessageRule(javax.mail.Message)
    */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void processMessageRule(final Message message) throws EmailRuleProcessorException {
     try {
-      message.setFlag(Flag.SEEN, true);
-      LOGGER.debug("--message marked as seen");
-    } catch (MessagingException exception) {
+      Email email = new Email(message);
+      LOGGER.debug("--==>> Email: {}", email);
+      
+      final Map root = new HashMap();
+      root.put("email", email);
+      
+      Template template = FREEMARKER_CFG.getTemplate("sample_email.ftlh");
+      final Writer writer = new BufferedWriter(new OutputStreamWriter(System.out));
+      template.process(root, writer);
+      
+    } catch (MessagingException | IOException | TemplateException exception) {
       LOGGER.error("FATAL: ", exception);
       throw new EmailRuleProcessorException(exception);
     }
