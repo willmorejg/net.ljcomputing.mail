@@ -41,7 +41,7 @@ public class Main {
     props.setProperty(MailProps.PROVIDER.toString(), "imap");
     props.setProperty(MailProps.HOST.toString(), "localhost");
     props.setProperty(MailProps.USERNAME.toString(), "jim");
-    props.setProperty(MailProps.PASSWORD.toString(), "Wiomm$001");
+    props.setProperty(MailProps.PASSWORD.toString(), "");
     
     try {
       final EmailRulesProcessor processor = new EmailRulesProcessor(props);
